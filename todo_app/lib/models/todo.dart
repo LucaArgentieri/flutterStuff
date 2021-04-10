@@ -1,7 +1,8 @@
 class ToDo {
   String text;
+  bool isDone;
 
-  ToDo({this.text});
+  ToDo({this.text, this.isDone = false});
 
   static List<ToDo> todoGenerator() {
     List<ToDo> todoList = [];

@@ -14,7 +14,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Lista'),
+        title: Text('Todo List'),
       ),
       body: Padding(
           padding: const EdgeInsets.all(8.0),
@@ -42,7 +42,54 @@ class _HomeScreenState extends State<HomeScreen> {
                   itemBuilder: (context, index) {
                     ToDo currentElement = listaTodo.elementAt(index);
                     return ListTile(
-                      title: Text(currentElement.text),
+                      title: Text(
+                        currentElement.text ?? 'null',
+                        style: TextStyle(
+                            decoration: currentElement.isDone
+                                ? TextDecoration.lineThrough
+                                : TextDecoration.none),
+                      ),
+                      trailing: IconButton(
+                        icon: Icon(Icons.delete),
+                        onPressed: () async {
+                          final result = await showDialog(
+                              context: context,
+                              builder: (context) {
+                                return AlertDialog(
+                                    title: Text('Sei sicuro?'),
+                                    actions: [
+                                      TextButton(
+                                        onPressed: () {
+                                          Navigator.pop(context, false);
+                                        },
+                                        child: Text('No'),
+                                      ),
+                                      TextButton(
+                                        onPressed: () {
+                                          Navigator.pop(context, true);
+                                        },
+                                        child: Text('Si'),
+                                      ),
+                                    ]);
+                              });
+
+                          if (result) {
+                            setState(() {
+                              listaTodo.removeAt(index);
+                            });
+                          }
+                        },
+                      ),
+                      leading: Checkbox(
+                        value: currentElement.isDone,
+                        onChanged: (newvalue) {
+                          setState(
+                            () {
+                              currentElement.isDone = newvalue;
+                            },
+                          );
+                        },
+                      ),
                     );
                   },
                 ),
