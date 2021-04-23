@@ -7,10 +7,21 @@ class ToDo {
   static List<ToDo> todoGenerator() {
     List<ToDo> todoList = [];
 
-    todoList.add(ToDo(text: 'Ciao'));
-    todoList.add(ToDo(text: 'Ciao sono ancora io'));
-    todoList.add(ToDo(text: 'Ciao ancora'));
+    final todos = [];
+    for (var i = 0; i <= 5; i++) {
+      todos.add(
+        ToDo(text: 'ToDo ${i + 1}'),
+      );
+    }
 
     return todoList;
   }
+
+  Map<String, dynamic> toMap() {
+    return {'text': this.text, 'isDone': this.isDone};
+  }
+
+  ToDo.fromMap(Map<String, dynamic> map)
+      : this.text = map['text'],
+        this.isDone = map['isDone'];
 }

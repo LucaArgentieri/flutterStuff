@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../models/todo.dart';
+import 'dart:convert';
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -7,8 +9,43 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  List<ToDo> listaTodo = ToDo.todoGenerator();
+  List<ToDo> listaTodo = [];
   String inputValue;
+  SharedPreferences sharedPreferences;
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+  }
+
+  void initSharedPreferences() async {
+    sharedPreferences = await SharedPreferences.getInstance();
+    recoverData();
+  }
+
+  saveData() async {
+    List<Map<String, dynamic>> listTodoAsMap =
+        listaTodo.map((toDo) => toDo.toMap()).toList();
+
+    List<String> listTodoAsString =
+        listTodoAsMap.map((toDoMap) => json.encode(toDoMap)).toList();
+
+    await sharedPreferences.setStringList('myKey', listTodoAsString);
+  }
+
+  recoverData() {
+    List<String> listTodoAsString =
+        sharedPreferences.getStringList('myKey') ?? [];
+
+    List<dynamic> listTodoAsMap =
+        listTodoAsString.map((toDoString) => json.decode(toDoString)).toList();
+
+    setState(() {
+      listaTodo =
+          listTodoAsMap.map((toDoMap) => ToDo.fromMap(toDoMap)).toList();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -28,11 +65,12 @@ class _HomeScreenState extends State<HomeScreen> {
                     hintText: 'Aggiungi nuovo elemento alla lista...',
                     suffixIcon: IconButton(
                       icon: Icon(Icons.add),
-                      onPressed: () {
+                      onPressed: () async {
                         ToDo pressedBtnValue = ToDo(text: inputValue);
                         setState(() {
                           listaTodo.add(pressedBtnValue);
                         });
+                        await saveData();
                       },
                     )),
               ),
@@ -78,16 +116,18 @@ class _HomeScreenState extends State<HomeScreen> {
                               listaTodo.removeAt(index);
                             });
                           }
+                          await saveData();
                         },
                       ),
                       leading: Checkbox(
                         value: currentElement.isDone,
-                        onChanged: (newvalue) {
+                        onChanged: (newvalue) async {
                           setState(
                             () {
                               currentElement.isDone = newvalue;
                             },
                           );
+                          await saveData();
                         },
                       ),
                     );
